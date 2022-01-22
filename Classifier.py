@@ -1,7 +1,6 @@
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,ExtraTreesClassifier, VotingClassifier, StackingClassifier, BaggingClassifier
-from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn import svm
@@ -10,13 +9,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import SGDClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score
+
 
 class Classifiers:
 
     def __init__(self, X_data, y_data):
         self.X_data = X_data
         self.y_data = y_data
-
 
     def decisionTree(self, X_test, y_test):
         dt = DecisionTreeClassifier()
@@ -28,6 +29,36 @@ class Classifiers:
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
+
+    def neuralNetwork(self, X_test, y_test, hls = 100):
+        mlp = MLPClassifier(hidden_layer_sizes=hls, max_iter=500)
+        mlp.fit(self.X_data, self.y_data)
+        score = mlp.score(X_test, y_test)
+        MSE = mean_squared_error(y_test, mlp.predict(X_test))
+        print('-----')
+        print('MLP')
+        print('-----')
+        print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
+        print("Mean squared error = " + str(round(MSE, 2)))
+
+    def bestMLPParams(self, X_test, y_test):
+        clf = MLPClassifier(solver='adam', hidden_layer_sizes=(100, 100, 100))
+
+        params = {
+            'hidden_layer_sizes': [(100, 100, 100), (125, 125, 125)]  # Every combination you want to try
+        }
+
+        gscv = GridSearchCV(clf, params, verbose=1)
+
+        gscv.fit(np.array(self.X_data), np.array(self.y_data))
+        print(gscv.best_params_)
+
+        predicted_values = gscv.predict(X_test)
+
+
+        score = accuracy_score(y_test, predicted_values)
+
+        print(score)
 
 
     def randomForest(self, X_test, y_test):
@@ -80,7 +111,7 @@ class Classifiers:
                       ('sgd', KNeighborsClassifier(n_neighbors=20))]
         estimators3 = [('rf', RandomForestClassifier(random_state=0)),
                        ('sgd', KNeighborsClassifier(n_neighbors=20)), ('et', ExtraTreesClassifier(n_estimators=200))]
-        clf = StackingClassifier(estimators=estimators, final_estimator=RandomForestClassifier()).fit(
+        clf = StackingClassifier(estimators=estimators2, final_estimator=RandomForestClassifier()).fit(
             self.X_data, self.y_data)
         print('-----')
         print('prediction with Stacking')
@@ -124,9 +155,9 @@ class Classifiers:
     def voting(self, X_test, y_test):
         clf1 = ExtraTreesClassifier(n_estimators=100, random_state=0)
         clf2 = RandomForestClassifier(random_state=1)
-        clf3 = GradientBoostingClassifier(random_state=0)
+        #clf3 = GradientBoostingClassifier(random_state=0)
         clf4 = KNeighborsClassifier(n_neighbors=20)
-        eclf1 = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('knn', clf3), ('gb', clf4)], voting='hard')
+        eclf1 = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('gb', clf4)], voting='hard')
         eclf1 = eclf1.fit(self.X_data, self.y_data)
         score = eclf1.score(X_test, y_test)
         MSE = mean_squared_error(y_test, eclf1.predict(X_test))

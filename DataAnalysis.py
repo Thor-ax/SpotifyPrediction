@@ -1,27 +1,34 @@
-import pandas as pd
-import warnings
-warnings.filterwarnings("ignore")
 from Preprocess import Preprocess
 from sklearn.model_selection import train_test_split
 from Classifier import Classifiers
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import GridSearchCV
+from sklearn.neural_network import MLPClassifier
 
-train_data  = pd.read_csv("spotify_dataset_train.csv")
-test_data  = pd.read_csv("spotify_dataset_test.csv")
+df  = pd.read_csv("spotify_dataset_subset.csv")
 
-preprocess = Preprocess(train_data)
+preprocess = Preprocess(df)
 
-preprocessTest = Preprocess(test_data)
+preprocess.infos()
 
-(X_data, y_data) = preprocess.PreprocessDs(True)
+# no nan values
+preprocess.nbNanValues()
 
+#preprocess.corr()
+
+(X_data, y_data) = preprocess.preprocessDsForPopularityPrediction()
+
+#pca
+x_data = preprocess.pca(X_data)
+
+preprocess.infos()
 
 X_train, X_test, y_train, y_test = train_test_split(X_data,y_data,test_size=0.25,random_state=0)
 
+
 Clf = Classifiers(X_train, y_train)
 
-preprocessTest.PreprocessDs(False)
-testDs = preprocessTest.getDs()
-preprocess.frequency(testDs)
 
 def test():
     #decisionTree
@@ -55,4 +62,12 @@ def test():
     #Voting
     Clf.voting(X_test, y_test)
     print()
+
+
+
+Clf.bestMLPParams(X_test, y_test)
+
+
+
+
 
