@@ -6,9 +6,6 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import svm
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import SGDClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.tree import plot_tree
@@ -121,15 +118,27 @@ class Classifiers:
         print('F1 score = %f' % f1_score(y_test, y_pred, average='weighted'))
         return y_pred
 
+    def predictPopularty(self, X_data):
+        clf = BaggingClassifier(base_estimator=RandomForestClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        y_pred = clf.predict(X_data)
+        return y_pred
+
+    def getClf(self):
+        return self.clf
+
     def bagging(self, X_test, y_test):
-        #clf = BaggingClassifier(base_estimator=RandomForestClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        clf = BaggingClassifier(base_estimator=RandomForestClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
         #clf =  BaggingClassifier(base_estimator=ExtraTreesClassifier(n_estimators=200), n_estimators = 15).fit(self.X_data, self.y_data)
-        clf =  BaggingClassifier(base_estimator=GradientBoostingClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf =  BaggingClassifier(base_estimator=GradientBoostingClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf =  BaggingClassifier(base_estimator=svm.LinearSVC(), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf =  BaggingClassifier(base_estimator=KNeighborsClassifier(n_neighbors=20), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf =  BaggingClassifier(base_estimator=LogisticRegression(multi_class='multinomial', max_iter=1500), n_estimators = 15).fit(self.X_data, self.y_data)
         score = clf.score(X_test, y_test)
+        self.clf = clf
         y_pred = clf.predict(X_test)
         MSE = mean_squared_error(y_test, y_pred)
         print('-----')
-        print('SVM')
+        print('bagging')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
@@ -143,7 +152,12 @@ class Classifiers:
                        ('sgd', KNeighborsClassifier(n_neighbors=20)), ('et', ExtraTreesClassifier(n_estimators=200))]
         estimators4 = [('rf', RandomForestClassifier(random_state=0)),
                        ('gb', GradientBoostingClassifier()), ('et', ExtraTreesClassifier(n_estimators=200))]
-        clf = StackingClassifier(estimators=estimators3, final_estimator=RandomForestClassifier()).fit(
+        estimators1 = [('rf', RandomForestClassifier()),
+                       ('lr', LogisticRegression(multi_class='multinomial', max_iter=1500)), ('knn', KNeighborsClassifier(n_neighbors=20))]
+        estimators5 = [('rf', RandomForestClassifier()),
+                       ('lr', LogisticRegression(multi_class='multinomial', max_iter=1500)),
+                       ('svm', svm.LinearSVC())]
+        clf = StackingClassifier(estimators=estimators5, final_estimator=RandomForestClassifier()).fit(
             self.X_data, self.y_data)
         print('-----')
         print('prediction with Stacking')
@@ -195,12 +209,13 @@ class Classifiers:
         return y_pred
 
     def voting(self, X_test, y_test):
-        clf1 = ExtraTreesClassifier(n_estimators=100, random_state=0)
-        clf2 = RandomForestClassifier(random_state=1)
-        clf3 = GradientBoostingClassifier(random_state=0)
-        clf4 = KNeighborsClassifier(n_neighbors=20)
-        clf5 =  LogisticRegression(multi_class='multinomial', max_iter=1500)
-        eclf1 = VotingClassifier(estimators=[('et', clf1), ('rf', clf2), ('gb', clf3)], voting='hard')
+        et = ExtraTreesClassifier(n_estimators=100, random_state=0)
+        rf = RandomForestClassifier(random_state=1)
+        gb = GradientBoostingClassifier(random_state=0)
+        knn = KNeighborsClassifier(n_neighbors=20)
+        SVM = svm.LinearSVC()
+        lr =  LogisticRegression(multi_class='multinomial', max_iter=1500)
+        eclf1 = VotingClassifier(estimators=[('SVM', SVM), ('rf', rf), ('knn', knn)], voting='hard')
         eclf1 = eclf1.fit(self.X_data, self.y_data)
         score = eclf1.score(X_test, y_test)
         y_pred = eclf1.predict(X_test)

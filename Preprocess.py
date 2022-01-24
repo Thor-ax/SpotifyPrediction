@@ -66,7 +66,6 @@ class Preprocess:
         self.X_data = X_data
         return X_data
 
-
     def PreprocessDs(self, isTrainingDs):
         self.ds['release_date'] = pd.to_datetime(self.ds['release_date'], format='%Y-%m-%d').dt.year
         le = LabelEncoder()

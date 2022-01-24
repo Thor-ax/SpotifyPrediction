@@ -2,10 +2,10 @@ from Preprocess import Preprocess
 from sklearn.model_selection import train_test_split
 from Classifier import Classifiers
 import pandas as pd
-from sklearn.metrics import confusion_matrix
 from sklearn import tree
 import matplotlib.pyplot as plt
-
+from Csv import Csv
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 df  = pd.read_csv("spotify_dataset_subset.csv")
 
 preprocess = Preprocess(df)
@@ -17,11 +17,12 @@ preprocess.infos()
 # no nan values
 preprocess.nbNanValues()
 
-preprocess.corr()
+#correlations
+#preprocess.corr()
 
 (X_data, y_data) = preprocess.preprocessDsForPopularityPrediction()
 #pca => to accelerate tests => remove for better results
-X_data = preprocess.pca(X_data)
+#X_data = preprocess.pca(X_data)
 
 X_train, X_test, y_train, y_test = train_test_split(X_data,y_data,test_size=0.25,random_state=0)
 
@@ -60,4 +61,21 @@ def test():
     Clf.voting(X_test, y_test)
     print()
 
-test()
+
+#bagging
+Clf.bagging(X_test, y_test)
+
+#predict popularity
+y_pred = Clf.bagging(X_data, y_data)
+
+csv = Csv(y_pred)
+csv.clearCsv("popularity.csv")
+csv.writeToCsv("popularity.csv")
+
+"""
+clf = Clf.getClf()
+cm = confusion_matrix(y_data, y_pred, labels=clf.classes_)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot()
+plt.show()
+"""
