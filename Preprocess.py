@@ -18,6 +18,9 @@ class Preprocess:
         print(self.ds.info())
 
     def nbNanValues(self):
+        print('-----')
+        print('Nan values')
+        print('-----')
         print(self.ds.isna().sum())
 
     def preprocessDsForPopularityPrediction(self):
@@ -53,9 +56,14 @@ class Preprocess:
         return (X_data, y_data)
 
     def pca(self, X_data):
-        pca = PCA(n_components=5)
+        pca = PCA(n_components=7)
+        print(X_data)
+        print(X_data.shape)
         pca.fit(X_data)
         X_data = pca.transform(X_data)
+        print(X_data.shape)
+        print(X_data)
+        self.X_data = X_data
         return X_data
 
 

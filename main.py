@@ -56,3 +56,4 @@ def test():
     Clf.voting(X_test, y_test)
     print()
 
+Clf.drawTree(X_test, y_test)

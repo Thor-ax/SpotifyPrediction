@@ -1,5 +1,5 @@
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, f1_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,ExtraTreesClassifier, VotingClassifier, StackingClassifier, BaggingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
@@ -11,6 +11,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import SGDClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
 
 
 class Classifiers:
@@ -34,12 +37,22 @@ class Classifiers:
         mlp = MLPClassifier(hidden_layer_sizes=hls, max_iter=500)
         mlp.fit(self.X_data, self.y_data)
         score = mlp.score(X_test, y_test)
-        MSE = mean_squared_error(y_test, mlp.predict(X_test))
+        y_pred = mlp.predict(X_test)
+        MSE = mean_squared_error(y_test, y_pred)
         print('-----')
         print('MLP')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
+        return y_pred
+
+    def drawTree(self, X_test, y_test):
+        plt.figure()
+        clf = DecisionTreeClassifier().fit(X_test, y_test)
+        plot_tree(clf, filled=True)
+        plt.title("Decision tree trained on all the features")
+        plt.show()
+
 
     def bestMLPParams(self, X_test, y_test):
         clf = MLPClassifier(solver='adam', hidden_layer_sizes=(100, 100, 100))
@@ -65,23 +78,30 @@ class Classifiers:
         rf = RandomForestClassifier(random_state=0)
         rf.fit(self.X_data, self.y_data)
         score = rf.score(X_test, y_test)
-        MSE = mean_squared_error(y_test, rf.predict(X_test))
+        y_pred = rf.predict(X_test)
+        MSE = mean_squared_error(y_test, y_pred)
         print('-----')
         print('Random forest')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
-        print("Mean squared error = " + str(round(MSE, 2)))
+        print('Mean squared error = %f'  %round(MSE, 2))
+        print('F1 score = %f' %f1_score(y_test, y_pred, average='weighted'))
+        return y_pred
 
     def knn(self, X_test, y_test):
         knn = KNeighborsClassifier(n_neighbors=20)
         knn.fit(self.X_data, self.y_data)
         score = knn.score(X_test, y_test)
-        MSE = mean_squared_error(y_test, knn.predict(X_test))
+        y_pred = knn.predict(X_test)
+        MSE = mean_squared_error(y_test, y_pred)
         print('-----')
         print('KNN')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
+        print('F1 score = %f' %f1_score(y_test, y_pred, average='weighted'))
+        return y_pred
+
 
     def svm(self, X_test, y_test):
         lin_clf = svm.LinearSVC()
@@ -95,23 +115,28 @@ class Classifiers:
         print("Mean squared error = " + str(round(MSE, 2)))
 
     def bagging(self, X_test, y_test):
-        clf = BaggingClassifier(base_estimator=RandomForestClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf = BaggingClassifier(base_estimator=RandomForestClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
+        #clf =  BaggingClassifier(base_estimator=ExtraTreesClassifier(n_estimators=200), n_estimators = 15).fit(self.X_data, self.y_data)
+        clf =  BaggingClassifier(base_estimator=GradientBoostingClassifier(), n_estimators = 15).fit(self.X_data, self.y_data)
         score = clf.score(X_test, y_test)
-        MSE = mean_squared_error(y_test, clf.predict(X_test))
+        y_pred = clf.predict(X_test)
+        MSE = mean_squared_error(y_test, y_pred)
         print('-----')
         print('SVM')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
+        print('F1 score = %f' %f1_score(y_test, y_pred, average='weighted'))
+        return y_pred
 
     def stacking(self, X_test):
-        estimators = [('rf', RandomForestClassifier(random_state=0)),
-                      ('sgd', make_pipeline(StandardScaler(), SGDClassifier(penalty='l1')))]
         estimators2 = [('rf', RandomForestClassifier(random_state=0)),
                       ('sgd', KNeighborsClassifier(n_neighbors=20))]
         estimators3 = [('rf', RandomForestClassifier(random_state=0)),
                        ('sgd', KNeighborsClassifier(n_neighbors=20)), ('et', ExtraTreesClassifier(n_estimators=200))]
-        clf = StackingClassifier(estimators=estimators2, final_estimator=RandomForestClassifier()).fit(
+        estimators4 = [('rf', RandomForestClassifier(random_state=0)),
+                       ('gb', GradientBoostingClassifier()), ('et', ExtraTreesClassifier(n_estimators=200))]
+        clf = StackingClassifier(estimators=estimators3, final_estimator=RandomForestClassifier()).fit(
             self.X_data, self.y_data)
         print('-----')
         print('prediction with Stacking')
@@ -120,7 +145,7 @@ class Classifiers:
         return y_predict
 
     def gradientBoosting(self, X_test, y_test):
-        gbc = GradientBoostingClassifier(random_state=0)
+        gbc = GradientBoostingClassifier()
         gbc.fit(self.X_data, self.y_data)
         score = gbc.score(X_test, y_test)
         MSE = mean_squared_error(y_test, gbc.predict(X_test))
@@ -131,7 +156,7 @@ class Classifiers:
         print("Mean squared error = " + str(round(MSE, 2)))
 
     def logisticRegression(self, X_test, y_test):
-        clf1 = LogisticRegression(multi_class='multinomial', random_state=1)
+        clf1 = LogisticRegression(multi_class='multinomial', max_iter=1500)
         clf1.fit(self.X_data, self.y_data)
         score = clf1.score(X_test, y_test)
         MSE = mean_squared_error(y_test, clf1.predict(X_test))
@@ -142,7 +167,7 @@ class Classifiers:
         print("Mean squared error = " + str(round(MSE, 2)))
 
     def extraTree(self, X_test, y_test):
-        etc = ExtraTreesClassifier(n_estimators=100, random_state=0)
+        etc = ExtraTreesClassifier(n_estimators=100)
         etc.fit(self.X_data, self.y_data)
         score = etc.score(X_test, y_test)
         MSE = mean_squared_error(y_test, etc.predict(X_test))
@@ -155,17 +180,21 @@ class Classifiers:
     def voting(self, X_test, y_test):
         clf1 = ExtraTreesClassifier(n_estimators=100, random_state=0)
         clf2 = RandomForestClassifier(random_state=1)
-        #clf3 = GradientBoostingClassifier(random_state=0)
+        clf3 = GradientBoostingClassifier(random_state=0)
         clf4 = KNeighborsClassifier(n_neighbors=20)
-        eclf1 = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('gb', clf4)], voting='hard')
+        clf5 =  LogisticRegression(multi_class='multinomial', max_iter=1500)
+        eclf1 = VotingClassifier(estimators=[('et', clf1), ('rf', clf2), ('gb', clf3)], voting='hard')
         eclf1 = eclf1.fit(self.X_data, self.y_data)
         score = eclf1.score(X_test, y_test)
-        MSE = mean_squared_error(y_test, eclf1.predict(X_test))
+        y_pred = eclf1.predict(X_test)
+        MSE = mean_squared_error(y_test, y_pred)
         print('-----')
         print('Voting')
         print('-----')
         print("Mean accuracy = " + str(round(100 * score, 2)) + "%")
         print("Mean squared error = " + str(round(MSE, 2)))
+        print('F1 score = %f' % f1_score(y_test, y_pred, average='weighted'))
+        return y_pred
 
     def bestRandomForestParameters(self, X_test, y_test):
         randomForestClassifier = RandomForestClassifier(random_state=0)
