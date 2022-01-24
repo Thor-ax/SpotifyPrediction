@@ -59,3 +59,5 @@ def test():
     #Voting
     Clf.voting(X_test, y_test)
     print()
+
+test()
