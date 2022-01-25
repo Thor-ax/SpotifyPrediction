@@ -31,7 +31,7 @@ class Preprocess:
         self.ds['genres'] = le.fit_transform(self.ds['genres'])
         self.ds.drop(['id'], axis=1, inplace=True)
 
-        features_columns = [col for col in self.ds.columns if col not in ['time_signature', 'genre']]
+        features_columns = [col for col in self.ds.columns if col not in ['popularity']]
 
         #scale datas
         sts = StandardScaler()

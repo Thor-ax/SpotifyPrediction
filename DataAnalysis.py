@@ -23,6 +23,8 @@ preprocess.nbNanValues()
 (X_data, y_data) = preprocess.preprocessDsForPopularityPrediction()
 #pca => to accelerate tests => remove for better results
 #X_data = preprocess.pca(X_data)
+preprocess.infos() # to  check the data information after preprocessing
+
 
 X_train, X_test, y_train, y_test = train_test_split(X_data,y_data,test_size=0.25,random_state=0)
 
