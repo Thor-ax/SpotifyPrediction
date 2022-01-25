@@ -20,8 +20,8 @@ X_train, X_test, y_train, y_test = train_test_split(X_data,y_data,test_size=0.25
 Clf = Classifiers(X_train, y_train)
 
 preprocessTest.PreprocessDs(False)
-testDs = preprocessTest.getDs()
-preprocess.frequency(testDs)
+# testDs = preprocessTest.getDs()
+# preprocess.frequency(testDs)
 
 def test():
     #decisionTree
@@ -56,4 +56,11 @@ def test():
     Clf.voting(X_test, y_test)
     print()
 
-Clf.drawTree(X_test, y_test)
+# Clf.drawTree(X_test, y_test)
+
+pred = Clf.randomForest(X_test, y_test)
+
+pred =preprocess.inverse(pred)
+column = ['genre']
+genre=pd.DataFrame(columns=column,data=pred)
+genre.to_csv('genre.csv',index = False) 

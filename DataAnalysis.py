@@ -63,6 +63,10 @@ def test():
     Clf.voting(X_test, y_test)
     print()
 
+    #Stacking
+    Clf.stacking(X_test, y_test)
+
+# test()
 
 #bagging
 Clf.bagging(X_test, y_test)

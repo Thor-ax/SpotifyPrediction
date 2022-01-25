@@ -1,0 +1,26 @@
+Analyse et prédiction du genre et de la popularité des chansons pour l'ensemble de données spotify.
+
+Preprocessing.py
+Prétraitement de l'ensemble des données d'entrée
+
+Deux fonctions pour deux jeux de données, une pour chacun des deux exercices.
+PreprocessDs(): function pour prétraitement de l'ensemble de données d'entrée de l'exercice 1
+preprocessDsForPopularityPrediction(): function pour prétraitement de l'ensemble de données d'entrée de l'exercice 2
+
+
+Classificateurs
+Cette classe contient quinze algorithmes de classification par apprentissage supervisé.
+
+
+main.py
+Pour l'exercice 1
+
+
+DataAnalysis.py
+Pour l'exercice 2
+
+CSV.py
+exporter des données csv
+
+
+

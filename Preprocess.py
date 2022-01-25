@@ -6,8 +6,10 @@ from sklearn.decomposition import PCA
 
 class Preprocess:
 
+
     def __init__(self, ds):
         self.ds = ds
+        self.le = LabelEncoder()
 
     def infos(self):
         print('-----')
@@ -29,6 +31,9 @@ class Preprocess:
         self.ds['artist_name'] = le.fit_transform(self.ds['artist_name'])
         self.ds['track_name'] = le.fit_transform(self.ds['track_name'])
         self.ds['genres'] = le.fit_transform(self.ds['genres'])
+
+        
+
         self.ds.drop(['id'], axis=1, inplace=True)
 
         features_columns = [col for col in self.ds.columns if col not in ['popularity']]
@@ -54,6 +59,7 @@ class Preprocess:
         self.X_data = X_data
         self.y_data = y_data
         return (X_data, y_data)
+   
 
     def pca(self, X_data):
         pca = PCA(n_components=7)
@@ -68,10 +74,9 @@ class Preprocess:
 
     def PreprocessDs(self, isTrainingDs):
         self.ds['release_date'] = pd.to_datetime(self.ds['release_date'], format='%Y-%m-%d').dt.year
-        le = LabelEncoder()
-        self.ds['explicit'] = le.fit_transform(self.ds['explicit'])
+        self.ds['explicit'] = self.le.fit_transform(self.ds['explicit'])
         if(isTrainingDs):
-            self.ds['genre'] = le.fit_transform(self.ds['genre'])
+            self.ds['genre'] = self.le.fit_transform(self.ds['genre'])
 
         features_columns = [col for col in self.ds.columns if col not in ['time_signature', 'genre']]
 
@@ -99,7 +104,8 @@ class Preprocess:
         X_data = data_scaler.to_numpy()
         self.X_data = X_data
         return X_data
-
+    def inverse(self,pred):
+        return self.le.inverse_transform(pred)
     def getDs(self):
         return self.ds
 
