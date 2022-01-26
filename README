@@ -2,24 +2,42 @@ Analyse et prédiction du genre et de la popularité des chansons pour l'ensembl
 
 Preprocessing.py
 Prétraitement de l'ensemble des données d'entrée.
-Deux fonctions pour deux jeux de données, une pour chacun des deux exercices.
-PreprocessDs(): function pour prétraitement de l'ensemble de données d'entrée de l'exercice 1
-preprocessDsForPopularityPrediction(): function pour prétraitement de l'ensemble de données d'entrée de l'exercice 2
+Deux fonctions pour deux jeux de donnés, une pour chacun des deux exercices.
+PreprocessDs(): fonction pour prétraitement de l'ensemble de données d'entrée de l'exercice 1
+preprocessDsForPopularityPrediction(): fonction pour prétraitement de l'ensemble de données d'entrée de l'exercice 2
 
 
 Classifier.py
 Cette classe contient quinze algorithmes de classification par apprentissage supervisé.
 
+Pour créer une instance, il faut appeler :
+
+Clf = Classifiers(X, y)
+
+avec X un array contenant les features et y un array contenant les labels à prédire.
+
+Par exemple, pour classifier avec un Random Forest, il faut faire:
+
+Clf.randomForest(X, y)
+
 
 main.py
-Pour l'exercice 1
+Ce fichier regroupe tous les appels de l'exercice 1 (prédiction du genre des musiques).
+Les résultats sont dans le fichier xie_morin.csv
 
 
 DataAnalysis.py
-Pour l'exercice 2
+Le fichier DataAnalysis regroupe les appels pour l'exercice 2, un exercice d'analyse des données dans lequel on a tenté de prédire la popularité de la musique.
+Les résultats sont dans le fichier popularity.csv
+
 
 CSV.py
-exporter des données csv
+La classe csv permet d'appliquer des méthodes d'écriture de données sur un fichier csv.
+Pour définir une instance:
+
+csv = Csv(y_pred)
+
+avec y_pred les labels prédits, ceux à inscrire sur le fichier csv.
 
 
 
